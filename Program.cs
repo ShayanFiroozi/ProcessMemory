@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,12 +12,22 @@ namespace ProcessMemory
     {
         private static void Main(string[] args)
         {
+            if (IsAdministrator() == false)
+            {
 
-            ProcessMemory processMemory = new ProcessMemory("devenv.exe","bcrypt.dll",true);
+                Console.WriteLine("Please run this app as administrator...");
+                Console.WriteLine("Press any key to exit...");
+
+                Console.ReadLine();
+                return;
+            }
 
 
-                Console.WriteLine(processMemory.ReadProcMemoryString(processMemory.ModuleInfo.BaseAddress, 
-                                                                     (int)100,
+            ProcessMemory processMemory = new ProcessMemory("_LNPR_.exe",true);
+
+
+                Console.WriteLine(processMemory.ReadProcMemoryString(processMemory.ProcessInfo.MainModule.BaseAddress, 
+                                                                     (int)1024,
                                                                      ProcessMemory.ReadWriteMemoryEncoding.ASCII));
             
 
@@ -24,5 +35,13 @@ namespace ProcessMemory
             Console.ReadLine();
 
         }
+
+        public static bool IsAdministrator()
+        {
+            var identity = WindowsIdentity.GetCurrent();
+            var principal = new WindowsPrincipal(identity);
+            return principal.IsInRole(WindowsBuiltInRole.Administrator);
+        }
+
     }
 }
